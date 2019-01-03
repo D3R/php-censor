@@ -61,6 +61,11 @@ class PhpCodeSniffer extends Plugin implements ZeroConfigPluginInterface
     protected $warningSeverity = null;
 
     /**
+     * @var array|null
+     */
+    protected $runtimeSet = null;
+
+    /**
      * @return string
      */
     public static function pluginName()
@@ -123,6 +128,10 @@ class PhpCodeSniffer extends Plugin implements ZeroConfigPluginInterface
 
         if (isset($options['warning_severity']) && is_int($options['warning_severity'])) {
             $this->warningSeverity = $options['warning_severity'];
+        }
+
+        if (isset($options['runtime_set']) && is_array($options['runtime_set'])) {
+            $this->runtimeSet = $options['runtime_set'];
         }
     }
 
@@ -217,7 +226,24 @@ class PhpCodeSniffer extends Plugin implements ZeroConfigPluginInterface
             $warningSeverity = ' --warning-severity=' . $this->warningSeverity;
         }
 
-        return [$ignore, $standard, $suffixes, $severity, $errorSeverity, $warningSeverity];
+        $runtimeSet = '';
+        if (is_array($this->runtimeSet) && 0 < count($this->runtimeSet)) {
+            $runtimeSet = [];
+            foreach ($this->runtimeSet as $key => $value) {
+                $runtimeSet[] = " --runtime-set {$key} {$value}";
+            }
+            $runtimeSet = implode(' ', $runtimeSet);
+        }
+
+        return [
+            $ignore,
+            $standard,
+            $suffixes,
+            $severity,
+            $errorSeverity,
+            $warningSeverity,
+            $runtimeSet
+        ];
     }
 
     /**
